@@ -1,10 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using UnitTestProject.Web.Models;
+using UnitTestProject.Web.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository< >));
 
 var connectionString = builder.Configuration["SqlConnectionString"];
 builder.Services.AddDbContext<UnitTestDbContext>(options =>
