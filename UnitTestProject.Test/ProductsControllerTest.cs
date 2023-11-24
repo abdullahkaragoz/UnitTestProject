@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Query.Internal;
 using Moq;
 using UnitTestProject.Web.Controllers;
 using UnitTestProject.Web.Models;
@@ -58,6 +59,32 @@ namespace UnitTestProject.Test
             Assert.Equal("Index", redirect.ActionName);
         }
 
+        [Fact]
+        public async void Details_IdInvalid_ReturnNotFound()
+        {
+            Product product = null;
+            _mockRepo.Setup(x=>x.GetById(0)).ReturnsAsync(product);
 
+            var result = await _controller.Details(0);
+            var redirect = Assert.IsType<NotFoundResult>(result);
+
+            Assert.Equal<int>(404, redirect.StatusCode);
+        }
+
+        [Theory]
+        [InlineData(1)]
+        public async void Details_ValidId_ReturnProduct(int productId)
+        {
+            Product product = products.First(x=>x.Id == productId);
+            _mockRepo.Setup(repo=>repo.GetById(productId)).ReturnsAsync(product);
+
+            var result = await _controller.Details(productId);
+            var viewResult = Assert.IsType<ViewResult>(result);
+            var resultProduct = Assert.IsAssignableFrom<Product>(viewResult.Model);
+
+
+            Assert.Equal(product.Id, resultProduct.Id);
+            Assert.Equal(product.Name, resultProduct.Name);
+        }
     }
 }
